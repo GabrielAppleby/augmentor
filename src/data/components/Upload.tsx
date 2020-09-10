@@ -7,10 +7,17 @@ interface UploadProps {
 
 export const Upload: React.FC<UploadProps> = (props) => {
     return (
-            <CSVReader
-                onDrop={props.handleDataChange}
-                addRemoveButton>
+        <div>
+            <CSVReader onDrop={props.handleDataChange}
+                       addRemoveButton
+                       style={{
+                           dropArea: {
+                               borderRadius: 20,
+                               height: 100,
+                           }
+                       }}>
                 <span>Drop CSV file here or click to upload.</span>
             </CSVReader>
+        </div>
     )
 }

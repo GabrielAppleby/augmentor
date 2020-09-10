@@ -8,7 +8,7 @@ interface DefaultAppBarProps {
 export const DefaultAppBar: React.FC<DefaultAppBarProps> = () => {
 
     return (
-        <AppBar position="static">
+        <AppBar position={"static"}>
             <Toolbar>
                 <Typography variant="h6">
                     VALT - AUGMENT
