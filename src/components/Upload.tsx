@@ -1,22 +1,26 @@
 import React from 'react'
-import { CSVReader } from 'react-papaparse'
+import {CSVReader} from 'react-papaparse'
+import {ParseResult} from "papaparse";
 
 interface UploadProps {
-    readonly handleDataChange: (data: any, file?: any) => void;
+    readonly handleDataChange: (data: ParseResult<string>[]) => void;
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
     return (
         <div>
-            <CSVReader onDrop={props.handleDataChange}
+            <CSVReader onFileLoad={props.handleDataChange}
+                       onError={blah => console.log(blah)}
+                       onRemoveFile={blah => console.log(blah)}
                        addRemoveButton
+                       noDrag
                        style={{
                            dropArea: {
                                borderRadius: 20,
                                height: 100,
                            }
                        }}>
-                <span>Drop CSV file here or click to upload.</span>
+                <span>Click to upload.</span>
             </CSVReader>
         </div>
     )

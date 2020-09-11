@@ -3,12 +3,13 @@ import MUIDataTable from "mui-datatables";
 
 interface EmbeddingTableProps {
     readonly data: any[][];
+    readonly header: string[];
 }
 
 export const DataTable: React.FC<EmbeddingTableProps> = (props) => {
 
-    const header = props.data[0];
-    const body = props.data.slice(1);
+    const header = props.header
+    const body = props.data;
 
     return (
         <MUIDataTable
