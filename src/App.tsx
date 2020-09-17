@@ -1,35 +1,50 @@
 import React, {useCallback, useState} from 'react';
-import './App.css';
-import {DataPanel} from "./panels/DataPanel";
+import {UploadPage} from "./pages/UploadPage";
 import {DefaultAppBar} from "./DefaultAppBar";
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-import {EmbeddingPanel} from "./panels/EmbeddingPanel";
-import {ParseResult} from "papaparse";
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
+import {ProjectionPage} from "./pages/ProjectionPage";
+import {makeStyles} from '@material-ui/core/styles';
+import {NumberParseResult} from "./components/Upload";
 
+const useStyles = makeStyles({
+    app: {},
+});
 
 function App() {
 
-    const [header, setHeader] = useState<string[] | undefined>(undefined);
-    const [data, setData] = useState<number[][] | undefined>(undefined);
+    const [columnNames, setColumnNames] = useState<string[] | undefined>(undefined);
+    const [rows, setRows] = useState<Record<'label' | string, number>[] | undefined>(undefined);
 
-    const handleDataChange = useCallback((data: ParseResult<string>[]) => {
-        const rows = data.map((item) => item.data);
-        setHeader(rows[0])
-        const numericalData = rows.slice(1).map((row) => row.map((numberStr) => parseFloat(numberStr)));
-        setData(numericalData);
+    const handleDataChange = useCallback((data: NumberParseResult[]) => {
+        if (data.length > 0) {
+            setColumnNames(data[0].meta.fields)
+            setRows(data.map(row => row.data))
+        }
     }, [])
 
+    const columnNamesNoLabel = columnNames ? [...columnNames]: undefined;
+    if (columnNamesNoLabel)
+    {
+        columnNamesNoLabel.pop();
+    }
+
+    const classes = useStyles();
+
     return (
-        <div className="App">
+        <div className={classes.app}>
             <DefaultAppBar/>
             <Router>
                 <Switch>
                     <Route exact path="/">
-                        <DataPanel header={header} data={data} handleDataChange={handleDataChange}/>
+                        <UploadPage columnNames={columnNames} rows={rows} handleDataChange={handleDataChange}/>
                     </Route>
-                    <Route path="/embedding">
-                        {data && <EmbeddingPanel data={data}/>}
-                    </Route>
+                    {rows ?
+                        <Route path="/embedding">
+                            <ProjectionPage columnNames={columnNamesNoLabel} rawRows={rows}/>
+                        </Route>
+                        :
+                        <Redirect to="/"/>
+                    }
                 </Switch>
             </Router>
         </div>

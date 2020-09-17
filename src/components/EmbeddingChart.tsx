@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 const BUFFER_PROPORTION = 1 / 20;
 const MARGINS_PROPORTION = 1 / 8;
 const CIRCLE_R = 2;
-// const colors = d3.scaleOrdinal(d3.schemeCategory10);
+const colors = d3.scaleOrdinal(d3.schemeCategory10);
 const WIDTH = 480;
 const HEIGHT = 480;
 
@@ -33,9 +33,9 @@ export const EmbeddingChart: React.FC<EmbeddingChartProps> = (props) => {
 
     const coords = props.data;
 
+
     useEffect(() => {
         if (coords) {
-
             const margins = WIDTH * MARGINS_PROPORTION;
             const getX = (d: number[]) => d[0];
             const getY = (d: number[]) => d[1];
@@ -77,7 +77,10 @@ export const EmbeddingChart: React.FC<EmbeddingChartProps> = (props) => {
                     })
                     .attr('r', CIRCLE_R)
                     .style("stroke", "black")
-                    .style("stroke-width", .25);
+                    .style("stroke-width", .25)
+                    .style("fill", (d) => {
+                        return colors(String(d[2]));
+                    });
 
                 xAxisG
                     .attr("class", "axis")
@@ -91,7 +94,6 @@ export const EmbeddingChart: React.FC<EmbeddingChartProps> = (props) => {
             }
 
         }
-
     }, [coords]);
 
     return (

@@ -2,7 +2,7 @@ import React from "react";
 import MUIDataTable from "mui-datatables";
 
 interface EmbeddingTableProps {
-    readonly data: any[][];
+    readonly data: Object[];
     readonly header: string[];
 }
 
@@ -13,7 +13,7 @@ export const DataTable: React.FC<EmbeddingTableProps> = (props) => {
 
     return (
         <MUIDataTable
-            title={"Employee List"}
+            title={"Uploaded Data"}
             data={body}
             columns={header}
         />
