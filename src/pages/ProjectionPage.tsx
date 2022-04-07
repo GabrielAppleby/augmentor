@@ -1,75 +1,59 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import {Grid} from "@material-ui/core";
-import {useUmap} from "../hooks/UseUmap";
-import {EmbeddingChart} from "../components/EmbeddingChart";
+// import {useUmap} from "../hooks/UseUmap";
+// import {EmbeddingChart} from "../components/EmbeddingChart";
 import {UmapControl} from "../components/UmapControl";
 import {UMAPParameters} from "umap-js";
 import {WeightingSliders} from "../components/WeightingSliders";
-import {useUnlabeledRows} from "../hooks/useUnlabeledRows";
+// import {useUnlabeledRows} from "../hooks/useUnlabeledRows";
 import {useWeights} from "../hooks/useWeights";
-import {useLabels} from "../hooks/useLabels";
-import {makeStyles} from "@material-ui/core/styles";
+// import {useLabels} from "../hooks/useLabels";
+// import {makeStyles} from "@material-ui/core/styles";
+import {EmbeddingChart} from "../components/EmbeddingChart";
+import {ParsedData} from "../App";
+import {useUmapParams} from "../hooks/useUmapParams";
+import {useSeparateLabelsFromParsedData} from "../hooks/useSeparateLabelsFromParsedData";
+import {useUmap} from "../hooks/UseUmap";
+import * as heap from "umap-js/dist/heap";
+
 
 interface ProjectionPageProps {
-    readonly columnNames: string[] | undefined;
-    readonly rawRows: Record<'label' | string, number>[];
+    readonly parsedData: ParsedData;
 }
 
-const useStyles = makeStyles({
-    controlGridItem: {
-        margin: "auto"
-    },
-});
+// const useStyles = makeStyles({
+//     controlGridItem: {
+//         margin: "auto"
+//     },
+// });
 
-export const ProjectionPage: React.FC<ProjectionPageProps> = ({columnNames, rawRows}) => {
-    const labels = useLabels(rawRows);
-    const unlabeledRows = useUnlabeledRows(rawRows)
-    const {weights, setWeights} = useWeights(columnNames);
-    const [labeledProjection, setLabeledProjection] = useState<undefined | number[][]>(undefined);
-    const [umapParams, setUmapParams] = useState<UMAPParameters>(
-        {
-            learningRate: 1.0,
-            localConnectivity: 1.0,
-            minDist: 0.1,
-            nComponents: 2,
-            nNeighbors: 15,
-            negativeSampleRate: 5,
-            repulsionStrength: 1.0,
-            setOpMixRatio: 1.0,
-            spread: 1.0,
-            transformQueueSize: 4.0
-        })
+export const ProjectionPage: React.FC<ProjectionPageProps> = ({parsedData}) => {
+    console.log("Projection Panel");
 
+    const separatedParsedData = useSeparateLabelsFromParsedData(parsedData);
+    const {weights, handleWeightsChange} = useWeights(separatedParsedData);
+    const {umapParams, handleUmapParamsChange} = useUmapParams();
 
-    const handleWeightsChange = useCallback((key: string, value: number) => {
-        const tempWeights: Record<string, number> = {...weights}
-        tempWeights[key] = value;
-        setWeights(tempWeights)
-    }, [weights, setWeights])
+    const umapProps = useMemo(() => {
+        return {separatedParsedData, umapParams, weights}
+        }, [separatedParsedData, umapParams, weights]);
 
-    const results = useUmap(unlabeledRows, umapParams, weights, labeledProjection)
+    console.log(umapProps);
+    const results = useUmap(umapProps);
 
-    useEffect(() => {
-        if (results && labels) {
-            results.forEach((item, idx) => item.push(labels[idx]))
-            setLabeledProjection(results)
-        }
-    }, [results, labels]);
-
-
-    const classes = useStyles();
+    // const classes = useStyles();
 
     return (
         <Grid container>
             <Grid item xs={12} sm={4}>
-                {labeledProjection && <EmbeddingChart data={labeledProjection}/>}
+                {results && <EmbeddingChart data={results.to_display}/>}
             </Grid>
-            <Grid item className={classes.controlGridItem} xs={12} sm={2}>
-                <WeightingSliders columnNames={columnNames} weights={weights}
+            <Grid item xs={12} sm={2}>
+                <WeightingSliders columnNames={separatedParsedData?.unlabeledParsedData.columnNames} weights={weights}
                                   handleWeightsChange={handleWeightsChange}/>
             </Grid>
-            <Grid item className={classes.controlGridItem} xs={12} sm={6}>
-                <UmapControl params={umapParams} setParams={setUmapParams}/>
+            <Grid item xs={12} sm={6}>
+                <UmapControl params={umapParams} handleParamsChange={handleUmapParamsChange}/>
             </Grid>
         </Grid>
     )

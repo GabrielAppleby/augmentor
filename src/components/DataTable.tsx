@@ -8,8 +8,11 @@ interface EmbeddingTableProps {
 
 export const DataTable: React.FC<EmbeddingTableProps> = (props) => {
 
+    console.log(props);
     const header = props.header
     const body = props.data;
+
+    console.log("Datatable component.")
 
     return (
         <MUIDataTable

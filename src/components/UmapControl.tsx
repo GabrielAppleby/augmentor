@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React from "react";
 import {TextField} from "@material-ui/core";
 import {UMAPParameters} from "umap-js";
 import {useForm} from "react-hook-form";
@@ -6,7 +6,7 @@ import {makeStyles} from "@material-ui/core/styles";
 
 interface UmapControlProps {
     readonly params: UMAPParameters,
-    readonly setParams: (data: UMAPParameters) => void;
+    readonly handleParamsChange: (data: UMAPParameters) => void;
 }
 
 const useStyles = makeStyles({
@@ -20,17 +20,14 @@ const useStyles = makeStyles({
     }
 });
 
-const Test: React.FC<UmapControlProps> = ({params, setParams}) => {
+const _UmapControl: React.FC<UmapControlProps> = ({params, handleParamsChange}) => {
     const {register, handleSubmit, errors} = useForm();
 
-    const onSubmit = useCallback((data: UMAPParameters) => {
-        setParams(data)
-    }, [setParams])
-
     const classes = useStyles();
+    console.log("Umap Control");
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(handleParamsChange)}>
             <div className={classes.formItemDiv}>
                 {Object.entries(params).map(
                     ([key, value]) => {
@@ -56,4 +53,4 @@ const Test: React.FC<UmapControlProps> = ({params, setParams}) => {
     );
 }
 
-export const UmapControl = React.memo(Test);
+export const UmapControl = React.memo(_UmapControl);

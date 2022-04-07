@@ -16,9 +16,10 @@ const useStyles = makeStyles({
     }
 });
 
-const Test: React.FC<WeightingSlidersProps> = ({columnNames, weights, handleWeightsChange}) => {
+const _WeightingSliders: React.FC<WeightingSlidersProps> = ({columnNames, weights, handleWeightsChange}) => {
 
     const classes = useStyles();
+    console.log("Weighting sliders");
 
     return (
         <div className={classes.slidersDiv}>
@@ -42,4 +43,4 @@ const Test: React.FC<WeightingSlidersProps> = ({columnNames, weights, handleWeig
     );
 }
 
-export const WeightingSliders = React.memo(Test);
+export const WeightingSliders = React.memo(_WeightingSliders);

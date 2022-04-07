@@ -14,6 +14,8 @@ interface UploadProps {
 }
 
 export const Upload: React.FC<UploadProps> = ({handleDataChange, handleUploadError}) => {
+    console.log("Upload component.")
+
     return (
         <CSVReader onFileLoad={handleDataChange}
                    onError={handleUploadError}

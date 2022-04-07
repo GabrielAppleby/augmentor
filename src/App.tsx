@@ -3,49 +3,95 @@ import {UploadPage} from "./pages/UploadPage";
 import {DefaultAppBar} from "./DefaultAppBar";
 import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom';
 import {ProjectionPage} from "./pages/ProjectionPage";
-import {makeStyles} from '@material-ui/core/styles';
 import {NumberParseResult} from "./components/Upload";
+import {Snackbar} from "@material-ui/core";
 
-const useStyles = makeStyles({
-    app: {},
-});
+// const useStyles = makeStyles({
+//     app: {},
+//     snackBar: {},
+// });
+
+export type DataRow = Record<string, number>;
+
+export type LabelDataRow = DataRow & Record<'label' | string, number>
+
+export interface ParsedData extends UnlabeledParsedData{
+    rows: LabelDataRow[];
+}
+
+export interface UnlabeledParsedData  {
+    columnNames: string[];
+    rows: DataRow[];
+}
+
+export interface SeperatedParsedData  {
+    unlabeledParsedData: UnlabeledParsedData;
+    labels: number[];
+}
+
+export interface SnackBarStatus {
+    readonly open: boolean;
+    readonly message: string;
+}
+
+const defaultSnackBarStatus = {open: false, message: "This should not appear."};
 
 function App() {
 
-    const [columnNames, setColumnNames] = useState<string[] | undefined>(undefined);
-    const [rows, setRows] = useState<Record<'label' | string, number>[] | undefined>(undefined);
+    console.log("App");
+
+    const [parsedData, setParsedData] = useState<ParsedData | undefined>(undefined);
+    const [snackBarStatus, setSnackBarStatus] = useState<SnackBarStatus>(defaultSnackBarStatus);
+
+    const handleParsingError = useCallback(_ => setSnackBarStatus({open: true, message: "An error occurred parsing the CSV."}), [])
+    const handleSnackBarClose = useCallback(() => setSnackBarStatus(defaultSnackBarStatus), []);
 
     const handleDataChange = useCallback((data: NumberParseResult[]) => {
+        console.log("Handle data change");
         if (data.length > 0) {
-            setColumnNames(data[0].meta.fields)
-            setRows(data.map(row => row.data))
+            if (data[0].meta && data[0].meta.fields && data[0].data)
+            {
+                setParsedData({columnNames: data[0].meta.fields, rows: data.map(row => row.data)});
+            }
+            else
+            {
+                handleParsingError(undefined);
+            }
         }
-    }, [])
+        else
+        {
+            handleParsingError(undefined);
+        }
+    }, [handleParsingError])
 
-    const columnNamesNoLabel = columnNames ? [...columnNames]: undefined;
-    if (columnNamesNoLabel)
-    {
-        columnNamesNoLabel.pop();
-    }
-
-    const classes = useStyles();
+    // const classes = useStyles();
 
     return (
-        <div className={classes.app}>
+        // <div className={classes.app}>
+        <div>
             <DefaultAppBar/>
             <Router>
                 <Switch>
                     <Route exact path="/">
-                        <UploadPage columnNames={columnNames} rows={rows} handleDataChange={handleDataChange}/>
+                        <UploadPage parsedData={parsedData}
+                                    handleDataChange={handleDataChange}
+                                    handleParsingError={handleParsingError}/>
                     </Route>
-                    {rows ?
+                    {parsedData ?
                         <Route path="/embedding">
-                            <ProjectionPage columnNames={columnNamesNoLabel} rawRows={rows}/>
+                            <ProjectionPage parsedData={parsedData}/>
                         </Route>
                         :
                         <Redirect to="/"/>
                     }
                 </Switch>
+                {/*<Snackbar className={classes.snackBar}*/}
+                <Snackbar
+                          anchorOrigin={{vertical: "top", horizontal: "center"}}
+                          open={snackBarStatus.open}
+                          autoHideDuration={3000}
+                          onClose={handleSnackBarClose}
+                          message={snackBarStatus.message}/>
             </Router>
         </div>
     );

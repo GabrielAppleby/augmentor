@@ -30,6 +30,7 @@ interface EmbeddingChartProps {
 
 export const EmbeddingChart: React.FC<EmbeddingChartProps> = (props) => {
     const d3Container = useRef(null);
+    console.log("Embedding chart");
 
     const coords = props.data;
 
